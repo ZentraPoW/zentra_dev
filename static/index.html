@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zentra Portal</title>
+    <link rel="stylesheet" href="https://unpkg.com/bulma@1.0.1/css/bulma.min.css">
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/marked@4.3.0/marked.min.js"></script>
+    <!-- <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script> -->
+    <style>
+        .post {
+            margin-bottom: 1.5rem;
+        }
+        .new-post-form {
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
+                <div class="is-flex is-align-items-center">
+                    <h1 class="title is-1 mr-4">Zentra Portal</h1>
+                    <div class="navbar-menu">
+                        <div class="navbar-start">
+                            <a class="navbar-item">Home</a>
+                            <a class="navbar-item">Forum</a>
+                            <a class="navbar-item">About</a>
+                        </div>
+                    </div>
+                </div>
+                <div id="login-button-container"></div>
+                <script>
+                    class LoginButton extends React.Component {
+                        loginWithMetamask() {
+                            // Implement MetaMask login logic here
+                            console.log('Logging in with MetaMask');
+                        }
+
+                        render() {
+                            return React.createElement(
+                                'button',
+                                {
+                                    className: 'button is-primary',
+                                    onClick: this.loginWithMetamask
+                                },
+                                'Login with MetaMask'
+                            );
+                        }
+                    }
+
+                    const root = ReactDOM.createRoot(document.getElementById('login-button-container'));
+                    root.render(React.createElement(LoginButton));
+                </script>
+            </div>
+            
+            <div id="posts" class="content">
+                <!-- Sample post -->
+                <div class="box post">
+                    <h2 class="title is-4">Welcome to our forum!</h2>
+                    <p class="subtitle is-6">Posted by: Admin</p>
+                    <div class="content">
+                        This is a sample post. Feel free to add your own posts below.
+                    </div>
+                </div>
+            </div>
+            <div id="pagination-container"></div>
+            <script>
+                function Pagination({ currentPage, totalPages, onPageChange }) {
+                    const pageNumbers = [];
+                    for (let i = 1; i <= totalPages; i++) {
+                        pageNumbers.push(i);
+                    }
+
+                    return React.createElement(
+                        'nav',
+                        { className: 'pagination is-centered', role: 'navigation', 'aria-label': 'pagination' },
+                        React.createElement(
+                            'ul',
+                            { className: 'pagination-list' },
+                            pageNumbers.map(number => 
+                                React.createElement(
+                                    'li',
+                                    { key: number },
+                                    React.createElement(
+                                        'a',
+                                        {
+                                            className: `pagination-link ${number === currentPage ? 'is-current' : ''}`,
+                                            'aria-label': `Goto page ${number}`,
+                                            onClick: () => onPageChange(number)
+                                        },
+                                        number
+                                    )
+                                )
+                            )
+                        )
+                    );
+                }
+
+                function PaginationContainer() {
+                    const [currentPage, setCurrentPage] = React.useState(1);
+                    const totalPages = 5; // This should be dynamically set based on your actual data
+
+                    const handlePageChange = (pageNumber) => {
+                        setCurrentPage(pageNumber);
+                        // Here you would typically fetch the data for the new page
+                        console.log(`Fetching data for page ${pageNumber}`);
+                    };
+
+                    return React.createElement(Pagination, {
+                        currentPage: currentPage,
+                        totalPages: totalPages,
+                        onPageChange: handlePageChange
+                    });
+                }
+
+                const paginationRoot = ReactDOM.createRoot(document.getElementById('pagination-container'));
+                paginationRoot.render(React.createElement(PaginationContainer));
+            </script>
+            <div class="new-post-form box">
+                <h2 class="title is-3">Create a New Post</h2>
+                <div class="field">
+                    <div class="control">
+                        <input class="input" type="text" id="post-title" placeholder="Enter post title" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        <textarea class="textarea" id="post-content" rows="4" placeholder="Enter post content" required></textarea>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-primary" onclick="addPost()">Submit Post</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function addPost() {
+            const title = document.getElementById('post-title').value;
+            const content = document.getElementById('post-content').value;
+            
+            if (title && content) {
+                const postsContainer = document.getElementById('posts');
+                const newPost = document.createElement('div');
+                newPost.className = 'post';
+                newPost.innerHTML = `
+                    <div class="post-title">${title}</div>
+                    <div class="post-author">Posted by: User</div>
+                    <div class="post-content">${content}</div>
+                `;
+                postsContainer.insertBefore(newPost, postsContainer.firstChild);
+                
+                // Clear the form
+                document.getElementById('post-title').value = '';
+                document.getElementById('post-content').value = '';
+            } else {
+                alert('Please fill in both title and content!');
+            }
+        }
+    </script>
+</body>
+</html>
