@@ -4,19 +4,58 @@ let post_list_this = null;
 
 
 class LoginButton extends React.Component {
-  loginWithMetamask() {
-    // Implement MetaMask login logic here
-    console.log('Logging in with MetaMask');
+  constructor(props) {
+    super(props);
+    this.state = {
+      address: null,
+    };
+  }
+
+  componentDidMount() {
+    this.checkConnection();
+  }
+
+  async checkConnection() {
+    if (typeof window.ethereum !== 'undefined') {
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      if (accounts.length > 0) {
+        this.setState({ address: accounts[0] });
+      }
+    }
+  }
+
+  async connectWallet() {
+    if (typeof window.ethereum !== 'undefined') {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        this.setState({ address: accounts[0] });
+        console.log('Connected with address:', accounts[0]);
+      } catch (error) {
+        console.error('Failed to connect with MetaMask:', error);
+      }
+    } else {
+      console.error('MetaMask is not installed');
+    }
   }
 
   render() {
+    const { address } = this.state;
+    
+    if (address) {
+      return React.createElement(
+        'span',
+        { className: 'tag is-medium' },
+        `${address.slice(0, 6)}...${address.slice(-4)}`
+      );
+    }
+
     return React.createElement(
       'button',
       {
         className: 'button is-primary',
-        onClick: this.loginWithMetamask
+        onClick: () => this.connectWallet()
       },
-      'Login with MetaMask'
+      'Connect MetaMask'
     );
   }
 }
