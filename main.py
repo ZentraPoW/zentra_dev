@@ -98,6 +98,26 @@ class ListPostsAPIHandler(tornado.web.RequestHandler):
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps(response))
 
+class PostAPIHandler(tornado.web.RequestHandler):
+    def get(self):
+        post_id = self.get_argument('id', None)
+        if not post_id:
+            self.set_status(400)
+            self.write({"error": "Missing post ID"})
+            return
+
+        db = database.get_conn()
+        post_data = db.get(('post-%s' % post_id).encode())
+
+        if not post_data:
+            self.set_status(404)
+            self.write({"error": "Post not found"})
+            return
+
+        post = json.loads(post_data.decode())
+
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps(post))
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
@@ -114,6 +134,7 @@ if __name__ == "__main__":
 
         (r"/api/new", NewPostAPIHandler),
         (r"/api/list", ListPostsAPIHandler),
+        (r"/api/post", PostAPIHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": os.path.join(os.path.dirname(__file__), "static")}),
     ], debug=True)  # Enable debug mode for auto-reload
     app.listen(8888)
