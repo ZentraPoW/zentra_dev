@@ -57,17 +57,6 @@
         </script>
       </div>
 
-      <div id="posts" class="content">
-        <!-- Sample post -->
-        <div class="box post">
-          <h2 class="title is-4">Welcome to our forum!</h2>
-          <p class="subtitle is-6">Posted by: Admin</p>
-          <div class="content">
-            This is a sample post. Feel free to add your own posts below.
-          </div>
-        </div>
-      </div>
-
       <div id="post-list-container"></div>
       <script>
         class PostList extends React.Component {
@@ -121,7 +110,7 @@
                   { key: post.id, className: 'box post' },
                   React.createElement('h2', { className: 'title is-4' }, post.title),
                   React.createElement('p', { className: 'subtitle is-6' }, `Posted by: ${post.author}`),
-                  React.createElement('div', { className: 'content' }, post.content)
+                  // React.createElement('div', { className: 'content' }, post.content)
                 )
               )
             );
@@ -202,10 +191,28 @@
             e.preventDefault();
             // Here you would typically call your API to create a new post
             console.log('Submitting new post:', { title, content });
-            // Reset form after submission
-            setTitle('');
-            setContent('');
-            setPreview('');
+            // Send HTTP POST request using fetch API
+            fetch('/api/new', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ title, content }),
+            })
+            .then(response => response.json())
+            .then(data => {
+              console.log('Success:', data);
+              // You can add additional logic here, such as updating the UI or showing a success message
+              // Reset form after submission
+              setTitle('');
+              setContent('');
+              setPreview('');
+
+            })
+            .catch((error) => {
+              console.error('Error:', error);
+              // Handle any errors here, such as showing an error message to the user
+            });
           };
 
           const handleContentChange = (e) => {
