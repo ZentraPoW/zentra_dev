@@ -1,17 +1,19 @@
 let post_this = null;
 let reply_this = null;
+let post_list_this = null;
 
 
 class Post extends React.Component {
   constructor(props) {
     super(props);
-    post_this = this;
 
     this.state = {
       post: null,
       isLoading: true,
       error: null
     };
+
+    post_this = this;
   }
 
   componentDidMount() {
@@ -240,6 +242,8 @@ class PostList extends React.Component {
       isLoading: true,
       error: null
     };
+
+    post_list_this = this;
   }
 
   componentDidMount() {
@@ -321,6 +325,7 @@ function NewPostForm() {
       setContent('');
       setPreview('');
 
+      post_list_this.fetchPosts();
     })
     .catch((error) => {
       console.error('Error:', error);
