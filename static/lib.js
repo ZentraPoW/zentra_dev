@@ -2,17 +2,22 @@ let post_this = null;
 let reply_this = null;
 let post_list_this = null;
 
-
 class LoginButton extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       address: null,
+      isMetaMaskInstalled: false,
     };
   }
 
   componentDidMount() {
+    this.checkMetaMaskInstallation();
     this.checkConnection();
+  }
+
+  checkMetaMaskInstallation() {
+    this.setState({ isMetaMaskInstalled: typeof window.ethereum !== 'undefined' });
   }
 
   async checkConnection() {
@@ -33,19 +38,30 @@ class LoginButton extends React.Component {
       } catch (error) {
         console.error('Failed to connect with MetaMask:', error);
       }
-    } else {
-      console.error('MetaMask is not installed');
     }
   }
 
   render() {
-    const { address } = this.state;
+    const { address, isMetaMaskInstalled } = this.state;
     
     if (address) {
       return React.createElement(
         'span',
         { className: 'tag is-medium' },
         `${address.slice(0, 6)}...${address.slice(-4)}`
+      );
+    }
+
+    if (!isMetaMaskInstalled) {
+      return React.createElement(
+        'a',
+        {
+          className: 'button is-primary',
+          href: 'https://metamask.io/download.html',
+          target: '_blank',
+          rel: 'noopener noreferrer'
+        },
+        'Install MetaMask'
       );
     }
 
