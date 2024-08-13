@@ -196,6 +196,7 @@
         function NewPostForm() {
           const [title, setTitle] = React.useState('');
           const [content, setContent] = React.useState('');
+          const [preview, setPreview] = React.useState('');
 
           const handleSubmit = (e) => {
             e.preventDefault();
@@ -204,6 +205,45 @@
             // Reset form after submission
             setTitle('');
             setContent('');
+            setPreview('');
+          };
+
+          const handleContentChange = (e) => {
+            const newContent = e.target.value;
+            setContent(newContent);
+            setPreview(marked.parse(newContent));
+          };
+
+          const insertMarkdown = (tag) => {
+            const textarea = document.querySelector('textarea');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            let insertion = '';
+
+            switch(tag) {
+              case 'h1':
+                insertion = '# ';
+                break;
+              case 'h2':
+                insertion = '## ';
+                break;
+              case 'h3':
+                insertion = '### ';
+                break;
+              case 'img':
+                insertion = '![alt text](image_url)';
+                break;
+              case 'code':
+                insertion = '```\n\n```';
+                break;
+            }
+
+            const newText = text.substring(0, start) + insertion + text.substring(end);
+            setContent(newText);
+            setPreview(marked.parse(newText));
+            textarea.focus();
+            textarea.setSelectionRange(start + insertion.length, start + insertion.length);
           };
 
           return React.createElement(
@@ -238,16 +278,16 @@
                   React.createElement('textarea', {
                     className: 'textarea',
                     rows: '4',
-                    placeholder: 'Enter post content',
+                    placeholder: 'Enter post content (Markdown supported)',
                     value: content,
-                    onChange: (e) => setContent(e.target.value),
+                    onChange: handleContentChange,
                     required: true
                   })
                 )
               ),
               React.createElement(
                 'div',
-                { className: 'field' },
+                { className: 'field is-grouped' },
                 React.createElement(
                   'div',
                   { className: 'control' },
@@ -256,8 +296,27 @@
                     { className: 'button is-primary', type: 'submit' },
                     'Submit Post'
                   )
+                ),
+                React.createElement(
+                  'div',
+                  { className: 'control' },
+                  React.createElement(
+                    'div',
+                    { className: 'buttons' },
+                    React.createElement('button', { type: 'button', className: 'button is-small', onClick: () => insertMarkdown('h1') }, 'H1'),
+                    React.createElement('button', { type: 'button', className: 'button is-small', onClick: () => insertMarkdown('h2') }, 'H2'),
+                    React.createElement('button', { type: 'button', className: 'button is-small', onClick: () => insertMarkdown('h3') }, 'H3'),
+                    React.createElement('button', { type: 'button', className: 'button is-small', onClick: () => insertMarkdown('img') }, 'Image'),
+                    React.createElement('button', { type: 'button', className: 'button is-small', onClick: () => insertMarkdown('code') }, 'Code')
+                  )
                 )
               )
+            ),
+            React.createElement(
+              'div',
+              { className: 'content' },
+              React.createElement('h3', { className: 'title is-4' }, 'Preview'),
+              React.createElement('div', { dangerouslySetInnerHTML: { __html: preview } })
             )
           );
         }
