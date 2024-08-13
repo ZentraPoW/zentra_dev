@@ -108,7 +108,11 @@
                 React.createElement(
                   'div',
                   { key: post.id, className: 'box post' },
-                  React.createElement('h2', { className: 'title is-4' }, post.title),
+                  React.createElement(
+                    'a',
+                    { href: `/post?id=${post.id}`, className: 'title is-4' },
+                    React.createElement('h2', null, post.title)
+                  ),
                   React.createElement('p', { className: 'subtitle is-6' }, `Posted by: ${post.author}`),
                   // React.createElement('div', { className: 'content' }, post.content)
                 )

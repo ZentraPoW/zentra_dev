@@ -180,34 +180,31 @@
         paginationRoot.render(React.createElement(PaginationContainer));
       </script>
 
-      <div id="new-post-container"></div>
+      <div id="reply-post-container"></div>
       <script>
-        function NewPostForm() {
-          const [title, setTitle] = React.useState('');
+        function ReplyPostForm() {
           const [content, setContent] = React.useState('');
           const [preview, setPreview] = React.useState('');
 
           const handleSubmit = (e) => {
             e.preventDefault();
-            // Here you would typically call your API to create a new post
-            console.log('Submitting new post:', { title, content });
+            // Here you would typically call your API to create a new reply
+            console.log('Submitting new reply:', { content });
             // Send HTTP POST request using fetch API
-            fetch('/api/new', {
+            fetch('/api/reply', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify({ title, content }),
+              body: JSON.stringify({ content }),
             })
             .then(response => response.json())
             .then(data => {
               console.log('Success:', data);
               // You can add additional logic here, such as updating the UI or showing a success message
               // Reset form after submission
-              setTitle('');
               setContent('');
               setPreview('');
-
             })
             .catch((error) => {
               console.error('Error:', error);
@@ -255,8 +252,8 @@
 
           return React.createElement(
             'div',
-            { className: 'new-post-form box' },
-            React.createElement('h2', { className: 'title is-3' }, 'Create a New Post'),
+            { className: 'reply-post-form box' },
+            React.createElement('h2', { className: 'title is-3' }, 'Create a Reply'),
             React.createElement(
               'form',
               { onSubmit: handleSubmit },
@@ -266,26 +263,10 @@
                 React.createElement(
                   'div',
                   { className: 'control' },
-                  React.createElement('input', {
-                    className: 'input',
-                    type: 'text',
-                    placeholder: 'Enter post title',
-                    value: title,
-                    onChange: (e) => setTitle(e.target.value),
-                    required: true
-                  })
-                )
-              ),
-              React.createElement(
-                'div',
-                { className: 'field' },
-                React.createElement(
-                  'div',
-                  { className: 'control' },
                   React.createElement('textarea', {
                     className: 'textarea',
                     rows: '4',
-                    placeholder: 'Enter post content (Markdown supported)',
+                    placeholder: 'Enter reply content (Markdown supported)',
                     value: content,
                     onChange: handleContentChange,
                     required: true
@@ -301,7 +282,7 @@
                   React.createElement(
                     'button',
                     { className: 'button is-primary', type: 'submit' },
-                    'Submit Post'
+                    'Submit Reply'
                   )
                 ),
                 React.createElement(
@@ -328,8 +309,8 @@
           );
         }
 
-        const newPostRoot = ReactDOM.createRoot(document.getElementById('new-post-container'));
-        newPostRoot.render(React.createElement(NewPostForm));
+        const replyPostRoot = ReactDOM.createRoot(document.getElementById('reply-post-container'));
+        replyPostRoot.render(React.createElement(ReplyPostForm));
       </script>
     </div>
   </section>
