@@ -112,7 +112,10 @@
               { className: 'box post' },
               React.createElement('h2', { className: 'title is-4' }, post.title),
               React.createElement('p', { className: 'subtitle is-6' }, `Posted by: ${post.author}`),
-              React.createElement('div', { className: 'content' }, post.content)
+              React.createElement('div', { 
+                className: 'content',
+                dangerouslySetInnerHTML: { __html: marked.parse(post.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')) }
+              })
             );
           }
         }
@@ -120,7 +123,6 @@
         const postRoot = ReactDOM.createRoot(document.getElementById('post-container'));
         postRoot.render(React.createElement(Post));
       </script>
-
 
       <div id="reply-post-container"></div>
       <script>
