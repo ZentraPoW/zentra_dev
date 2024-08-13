@@ -132,15 +132,17 @@
 
           const handleSubmit = (e) => {
             e.preventDefault();
+            const urlParams = new URLSearchParams(window.location.search);
+            const postId = urlParams.get('id');
             // Here you would typically call your API to create a new reply
-            console.log('Submitting new reply:', { content });
+            console.log('Submitting new reply:', { content, postId });
             // Send HTTP POST request using fetch API
-            fetch('/api/reply', {
+            fetch('/api/reply?post_id='+postId, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify({ content }),
+              body: JSON.stringify({ content, post_id: postId }),
             })
             .then(response => response.json())
             .then(data => {

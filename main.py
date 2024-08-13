@@ -30,7 +30,6 @@ class NewPostAPIHandler(tornado.web.RequestHandler):
         #     return
 
         post_id = uuid.uuid4().hex
-
         post = {
             "id": post_id,
             "title": title,
@@ -47,6 +46,44 @@ class NewPostAPIHandler(tornado.web.RequestHandler):
         self.set_status(201)  # Created
         self.finish({"message": "Post created successfully", "id": 'post-%s' % post_id, "timeline_id": timeline_id})
 
+class ReplyAPIHandler(tornado.web.RequestHandler):
+    def post(self):
+        data = json.loads(self.request.body or '{}')
+        post_id = data.get('post_id')
+        content = data.get('content')
+
+        if not post_id or not content:
+            self.set_status(400)
+            self.write({"error": "Missing post ID or content"})
+            return
+
+        db = database.get_conn()
+        post_data = db.get(('post-%s' % post_id).encode())
+
+        if not post_data:
+            self.set_status(404)
+            self.write({"error": "Post not found"})
+            return
+
+        reply_id = str(uuid.uuid4().hex)
+        reply = {
+            "id": reply_id,
+            "post_id": post_id,
+            "content": content,
+            "timestamp": int(time.time())
+        }
+
+        db.put(('reply-%s' % reply_id).encode(), json.dumps(reply).encode())
+
+        # Update the post with the new reply
+        post = json.loads(post_data.decode())
+        if 'replies' not in post:
+            post['replies'] = []
+        post['replies'].append(reply_id)
+        db.put(('post-%s' % post_id).encode(), json.dumps(post).encode())
+
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps({"success": True, "reply_id": reply_id}))
 
 class ListPostsAPIHandler(tornado.web.RequestHandler):
     def get(self):
@@ -116,6 +153,20 @@ class PostAPIHandler(tornado.web.RequestHandler):
 
         post = json.loads(post_data.decode())
 
+        # Get reply ids from the post data
+        reply_ids = post.get('replies', [])
+
+        # Fetch replies for the post
+        replies = []
+        for reply_id in reply_ids:
+            reply_data = db.get(('reply-%s' % reply_id).encode())
+            if reply_data:
+                reply = json.loads(reply_data.decode())
+                replies.append(reply)
+
+        # Add replies to the post data
+        post['replies'] = replies
+
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps(post))
 
@@ -133,6 +184,7 @@ if __name__ == "__main__":
         (r"/post", PostHandler),
 
         (r"/api/new", NewPostAPIHandler),
+        (r"/api/reply", ReplyAPIHandler),
         (r"/api/list", ListPostsAPIHandler),
         (r"/api/post", PostAPIHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": os.path.join(os.path.dirname(__file__), "static")}),
