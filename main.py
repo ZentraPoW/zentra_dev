@@ -103,9 +103,15 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("static/index.html")
 
+class PostHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.render("static/post.html")
+
 if __name__ == "__main__":
     app = tornado.web.Application([
         (r"/", MainHandler),
+        (r"/post", PostHandler),
+
         (r"/api/new", NewPostAPIHandler),
         (r"/api/list", ListPostsAPIHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": os.path.join(os.path.dirname(__file__), "static")}),
