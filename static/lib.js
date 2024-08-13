@@ -3,6 +3,25 @@ let reply_this = null;
 let post_list_this = null;
 
 
+class LoginButton extends React.Component {
+  loginWithMetamask() {
+    // Implement MetaMask login logic here
+    console.log('Logging in with MetaMask');
+  }
+
+  render() {
+    return React.createElement(
+      'button',
+      {
+        className: 'button is-primary',
+        onClick: this.loginWithMetamask
+      },
+      'Login with MetaMask'
+    );
+  }
+}
+
+
 class Post extends React.Component {
   constructor(props) {
     super(props);
@@ -449,6 +468,7 @@ function NewPostForm() {
 
 
 export {
+  LoginButton,
   Post,
   ReplyPostForm,
   PostList,

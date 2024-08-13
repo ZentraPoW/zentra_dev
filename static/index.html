@@ -33,28 +33,6 @@
           </div>
         </div>
         <div id="login-button-container"></div>
-        <script>
-          class LoginButton extends React.Component {
-            loginWithMetamask() {
-              // Implement MetaMask login logic here
-              console.log('Logging in with MetaMask');
-            }
-
-            render() {
-              return React.createElement(
-                'button',
-                {
-                  className: 'button is-primary',
-                  onClick: this.loginWithMetamask
-                },
-                'Login with MetaMask'
-              );
-            }
-          }
-
-          const root = ReactDOM.createRoot(document.getElementById('login-button-container'));
-          root.render(React.createElement(LoginButton));
-        </script>
       </div>
 
       <div id="post-list-container"></div>
@@ -127,9 +105,13 @@
 <script type="module">
 
 import {
+  LoginButton,
   PostList,
   NewPostForm,
 } from '/static/lib.js';
+
+const loginRoot = ReactDOM.createRoot(document.getElementById('login-button-container'));
+loginRoot.render(React.createElement(LoginButton));
 
 const postListRoot = ReactDOM.createRoot(document.getElementById('post-list-container'));
 postListRoot.render(React.createElement(PostList));
