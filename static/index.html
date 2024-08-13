@@ -211,7 +211,7 @@
           const handleContentChange = (e) => {
             const newContent = e.target.value;
             setContent(newContent);
-            setPreview(marked.parse(newContent));
+            setPreview(marked.parse(newContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')));
           };
 
           const insertMarkdown = (tag) => {
@@ -241,7 +241,7 @@
 
             const newText = text.substring(0, start) + insertion + text.substring(end);
             setContent(newText);
-            setPreview(marked.parse(newText));
+            setPreview(marked.parse(newText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')));
             textarea.focus();
             textarea.setSelectionRange(start + insertion.length, start + insertion.length);
           };
