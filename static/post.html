@@ -115,7 +115,25 @@
               React.createElement('div', { 
                 className: 'content',
                 dangerouslySetInnerHTML: { __html: marked.parse(post.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')) }
-              })
+              }),
+              React.createElement(
+                'div',
+                { className: 'replies' },
+                React.createElement('h3', { className: 'title is-5' }, 'Replies'),
+                post.replies && post.replies.length > 0
+                  ? post.replies.map(reply =>
+                      React.createElement(
+                        'div',
+                        { key: reply.id, className: 'box reply' },
+                        React.createElement('p', { className: 'subtitle is-6' }, `Reply by: Anonymous`),
+                        React.createElement('div', { 
+                          className: 'content',
+                          dangerouslySetInnerHTML: { __html: marked.parse(reply.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')) }
+                        })
+                      )
+                    )
+                  : React.createElement('p', null, 'No replies yet.')
+              )
             );
           }
         }
