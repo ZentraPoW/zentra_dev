@@ -50,7 +50,7 @@
 import {
   LoginButton,
   PostList,
-  PaginationContainer,
+  Pagination,
   NewPostForm,
 } from '/static/lib.js';
 
@@ -61,7 +61,7 @@ const postListRoot = ReactDOM.createRoot(document.getElementById('post-list-cont
 postListRoot.render(React.createElement(PostList));
 
 const paginationRoot = ReactDOM.createRoot(document.getElementById('pagination-container'));
-paginationRoot.render(React.createElement(PaginationContainer));
+paginationRoot.render(React.createElement(Pagination));
 
 const newPostRoot = ReactDOM.createRoot(document.getElementById('new-post-container'));
 newPostRoot.render(React.createElement(NewPostForm));

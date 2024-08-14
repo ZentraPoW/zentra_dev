@@ -415,57 +415,57 @@ class PostList extends React.Component {
   }
 }
 
-function Pagination({ currentPage, totalPages, onPageChange }) {
-  return React.createElement(
-    'nav',
-    { className: 'pagination is-centered', role: 'navigation', 'aria-label': 'pagination' },
-    React.createElement(
-      'div',
-      { className: 'pagination-list' },
-      React.createElement(
-        'button',
-        {
-          className: 'button pagination-previous',
-          onClick: () => onPageChange(currentPage - 1),
-          disabled: currentPage === 1
-        },
-        'Previous'
-      ),
-      React.createElement(
-        'button',
-        {
-          className: 'button pagination-next',
-          onClick: () => onPageChange(currentPage + 1),
-          disabled: currentPage === totalPages
-        },
-        'Next'
-      ),
-      React.createElement(
-        'span',
-        { className: 'pagination-current' },
-        `Page ${currentPage} of ${totalPages}`
-      )
-    )
-  );
-}
+class Pagination extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      currentPage: 1,
+    };
+  }
 
-function PaginationContainer() {
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const totalPages = 5; // This should be dynamically set based on your actual data
-
-  const handlePageChange = (pageNumber) => {
-    if (pageNumber >= 1 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);
+  handlePageChange = (pageNumber) => {
+    if (pageNumber >= 1) {
+      this.setState({ currentPage: pageNumber });
       // Here you would typically fetch the data for the new page
       console.log(`Fetching data for page ${pageNumber}`);
     }
   };
 
-  return React.createElement(Pagination, {
-    currentPage: currentPage,
-    totalPages: totalPages,
-    onPageChange: handlePageChange
-  });
+  render() {
+    const { currentPage } = this.state;
+
+    return React.createElement(
+      'nav',
+      { className: 'pagination is-centered', role: 'navigation', 'aria-label': 'pagination' },
+      React.createElement(
+        'div',
+        { className: 'pagination-list' },
+        React.createElement(
+          'button',
+          {
+            className: 'button pagination-previous',
+            onClick: () => this.handlePageChange(currentPage - 1),
+            disabled: currentPage === 1
+          },
+          'Previous'
+        ),
+        React.createElement(
+          'span',
+          { className: 'pagination-current' },
+          `Page ${currentPage}`
+        ),
+        React.createElement(
+          'button',
+          {
+            className: 'button pagination-next',
+            onClick: () => this.handlePageChange(currentPage + 1),
+            disabled: false,
+          },
+          'Next'
+        ),
+      )
+    );
+  }
 }
 
 
@@ -673,7 +673,7 @@ export {
   Post,
   ReplyPostForm,
   PostList,
-  PaginationContainer,
+  Pagination,
   NewPostForm,
   post_this,
   reply_this,
