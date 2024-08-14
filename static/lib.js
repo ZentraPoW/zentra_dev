@@ -186,7 +186,8 @@ class ReplyPostForm extends React.Component {
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       const account = accounts[0];
 
-      const message = JSON.stringify({ 'post_id':postId, content });
+      const timestamp = Math.floor(Date.now() / 1000);
+      const message = JSON.stringify({ 'post_id':postId, content, timestamp });
       const signature = await window.ethereum.request({
         method: 'personal_sign',
         params: [message, account],
@@ -197,7 +198,7 @@ class ReplyPostForm extends React.Component {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ content, signature, address: account, post_id: postId }),
+        body: JSON.stringify({ content, signature, address: account, post_id: postId, timestamp }),
       });
 
       const data = await response.json();
@@ -503,7 +504,8 @@ class NewPostForm extends React.Component {
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       const account = accounts[0];
 
-      const message = JSON.stringify({ title, content });
+      const timestamp = Math.floor(Date.now() / 1000);
+      const message = JSON.stringify({ title, content, timestamp });
       const signature = await window.ethereum.request({
         method: 'personal_sign',
         params: [message, account],
@@ -514,7 +516,7 @@ class NewPostForm extends React.Component {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ title, content, signature, address: account }),
+        body: JSON.stringify({ title, content, signature, address: account, timestamp }),
       });
 
       const data = await response.json();

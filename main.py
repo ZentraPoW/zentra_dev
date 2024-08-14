@@ -26,15 +26,18 @@ class NewPostAPIHandler(tornado.web.RequestHandler):
         content = data['content']
         signature = data['signature']
         address = data['address']
+        timestamp = int(data['timestamp'])
 
+        assert int(time.time()) - timestamp < 60
         # Validate the signature
-        if not signature or not address:
-            self.set_status(400)
-            self.finish({"error": "Signature and address are required"})
-            return
+        # if not signature or not address:
+        #     self.set_status(400)
+        #     self.finish({"error": "Signature and address are required"})
+        #     return
+
 
         # Reconstruct the message that was signed
-        message = json.dumps({"title": title, "content": content}, separators = (',', ':'), ensure_ascii=False)
+        message = json.dumps({'title': title, 'content': content, 'timestamp': timestamp}, separators = (',', ':'), ensure_ascii=False)
         # try:
         recovered_address = w3.eth.account.recover_message(
             eth_account.messages.encode_defunct(text=message),
@@ -58,10 +61,10 @@ class NewPostAPIHandler(tornado.web.RequestHandler):
             "title": title,
             "content": content,
             "author": author,
-            "timestamp": time.time()
+            "timestamp": timestamp
         }
 
-        timeline_id = 'timeline-%s-%s' % (str(10**15 - int(time.time())).zfill(15), post_id)
+        timeline_id = 'timeline-%s-%s' % (str(10**15 - timestamp).zfill(15), post_id)
         # Store the post in RocksDB
         db.put(('post-%s' % post_id).encode(), json.dumps(post).encode())
         db.put(timeline_id.encode(), post_id.encode())
@@ -76,13 +79,15 @@ class ReplyAPIHandler(tornado.web.RequestHandler):
         content = data['content']
         signature = data['signature']
         address = data['address']
+        timestamp = int(data['timestamp'])
 
+        assert int(time.time()) - timestamp < 60
         # if not post_id or not content:
         #     self.set_status(400)
         #     self.write({"error": "Missing post ID or content"})
         #     return
 
-        message = json.dumps({"post_id": post_id, "content": content}, separators = (',', ':'), ensure_ascii=False)
+        message = json.dumps({'post_id': post_id, 'content': content, 'timestamp': timestamp}, separators = (',', ':'), ensure_ascii=False)
         recovered_address = w3.eth.account.recover_message(
             eth_account.messages.encode_defunct(text=message),
             signature=signature
@@ -107,7 +112,7 @@ class ReplyAPIHandler(tornado.web.RequestHandler):
             "post_id": post_id,
             "content": content,
             "author": author,
-            "timestamp": int(time.time())
+            "timestamp": timestamp
         }
 
         db.put(('reply-%s' % reply_id).encode(), json.dumps(reply).encode())
