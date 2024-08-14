@@ -7,9 +7,12 @@ import time
 
 import tornado.ioloop
 import tornado.web
+import web3
+import eth_account.messages
 
 import database
 
+w3 = web3.Web3()
 
 class NewPostAPIHandler(tornado.web.RequestHandler):
     def get(self):
@@ -17,18 +20,38 @@ class NewPostAPIHandler(tornado.web.RequestHandler):
 
     def post(self):
         db = database.get_conn()
-        
-        # Parse the JSON body
-        data = json.loads(self.request.body or '{}')
-        title = data.get('title')
-        content = data.get('content')
-        author = data.get('author', 'Anonymous')  # Default to 'Anonymous' if no author provided
 
-        # if not title or not content:
+        data = json.loads(self.request.body or '{}')
+        title = data['title']
+        content = data['content']
+        signature = data['signature']
+        address = data['address']
+
+        # Validate the signature
+        if not signature or not address:
+            self.set_status(400)
+            self.finish({"error": "Signature and address are required"})
+            return
+
+        # Reconstruct the message that was signed
+        message = json.dumps({"title": title, "content": content}, separators = (',', ':'))
+        # try:
+        recovered_address = w3.eth.account.recover_message(
+            eth_account.messages.encode_defunct(text=message),
+            signature=signature
+        )
+        print(recovered_address.lower(), address.lower())
+        if recovered_address.lower() != address.lower():
+            self.set_status(401)
+            self.finish({"error": "Invalid signature"})
+            return
+        # except Exception as e:
         #     self.set_status(400)
-        #     self.finish({"error": "Title and content are required"})
+        #     self.finish({"error": f"Signature verification failed: {str(e)}"})
         #     return
 
+        # If we get here, the signature is valid
+        author = address
         post_id = uuid.uuid4().hex
         post = {
             "id": post_id,
@@ -49,12 +72,24 @@ class NewPostAPIHandler(tornado.web.RequestHandler):
 class ReplyAPIHandler(tornado.web.RequestHandler):
     def post(self):
         data = json.loads(self.request.body or '{}')
-        post_id = data.get('post_id')
-        content = data.get('content')
+        post_id = data['post_id']
+        content = data['content']
+        signature = data['signature']
+        address = data['address']
 
         if not post_id or not content:
             self.set_status(400)
             self.write({"error": "Missing post ID or content"})
+            return
+
+        message = json.dumps({"post_id": post_id, "content": content}, separators = (',', ':'))
+        recovered_address = w3.eth.account.recover_message(
+            eth_account.messages.encode_defunct(text=message),
+            signature=signature
+        )
+        if recovered_address.lower() != address.lower():
+            self.set_status(401)
+            self.finish({"error": "Invalid signature"})
             return
 
         db = database.get_conn()
@@ -65,11 +100,13 @@ class ReplyAPIHandler(tornado.web.RequestHandler):
             self.write({"error": "Post not found"})
             return
 
+        author = address
         reply_id = str(uuid.uuid4().hex)
         reply = {
             "id": reply_id,
             "post_id": post_id,
             "content": content,
+            "author": author,
             "timestamp": int(time.time())
         }
 

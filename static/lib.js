@@ -186,7 +186,7 @@ class ReplyPostForm extends React.Component {
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       const account = accounts[0];
 
-      const message = JSON.stringify({ content });
+      const message = JSON.stringify({ 'post_id':postId, content });
       const signature = await window.ethereum.request({
         method: 'personal_sign',
         params: [message, account],
