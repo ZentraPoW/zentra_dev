@@ -359,6 +359,7 @@ class PostList extends React.Component {
       isLoading: true,
       error: null
     };
+    this.page2fromtimestamp = {}
 
     post_list_this = this;
   }
@@ -367,14 +368,25 @@ class PostList extends React.Component {
     this.fetchPosts();
   }
 
-  fetchPosts() {
-    fetch('/api/list')
+  fetchPosts(page = 1) {
+    var url = '/api/list';
+    console.log(this.page2fromtimestamp);
+    if(page > 1){
+      console.log(page);
+      const timeline = this.page2fromtimestamp[page];
+      url = `/api/list?from_timestamp=${timeline}`;
+    // }else{
+    //   page = 1;
+    }
+    fetch(url)
       .then(response => response.json())
       .then(data => {
         this.setState({
           posts: data.posts,
           isLoading: false
         });
+        this.page2fromtimestamp[page+1] = data.pagination.next_from_post;
+        console.log(this.page2fromtimestamp);
       })
       .catch(error => {
         this.setState({
@@ -415,6 +427,7 @@ class PostList extends React.Component {
   }
 }
 
+
 class Pagination extends React.Component {
   constructor(props) {
     super(props);
@@ -429,6 +442,7 @@ class Pagination extends React.Component {
       // Here you would typically fetch the data for the new page
       console.log(`Fetching data for page ${pageNumber}`);
     }
+    post_list_this.fetchPosts(pageNumber);
   };
 
   render() {
@@ -436,10 +450,15 @@ class Pagination extends React.Component {
 
     return React.createElement(
       'nav',
-      { className: 'pagination is-centered', role: 'navigation', 'aria-label': 'pagination' },
+      { className: 'pagination is-right', role: 'navigation', 'aria-label': 'pagination' },
       React.createElement(
         'div',
         { className: 'pagination-list' },
+        React.createElement(
+          'span',
+          { className: 'pagination-current' },
+          `Page ${currentPage}`
+        ),
         React.createElement(
           'button',
           {
@@ -448,11 +467,6 @@ class Pagination extends React.Component {
             disabled: currentPage === 1
           },
           'Previous'
-        ),
-        React.createElement(
-          'span',
-          { className: 'pagination-current' },
-          `Page ${currentPage}`
         ),
         React.createElement(
           'button',
