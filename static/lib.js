@@ -172,35 +172,78 @@ class ReplyPostForm extends React.Component {
     reply_this = this;
   }
 
-  handleSubmit = (e) => {
-    e.preventDefault();
+  async signAndSubmitReply(content) {
     const urlParams = new URLSearchParams(window.location.search);
     const postId = urlParams.get('id');
-    // Here you would typically call your API to create a new reply
     console.log('Submitting new reply:', { content: this.state.content, postId });
-    // Send HTTP POST request using fetch API
-    fetch('/api/reply', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ content: this.state.content, post_id: postId }),
-    })
-    .then(response => response.json())
-    .then(data => {
+
+    if (typeof window.ethereum === 'undefined') {
+      console.error('MetaMask is not installed');
+      return;
+    }
+
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const account = accounts[0];
+
+      const message = JSON.stringify({ content });
+      const signature = await window.ethereum.request({
+        method: 'personal_sign',
+        params: [message, account],
+      });
+
+      const response = await fetch('/api/reply', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content, signature, address: account, post_id: postId }),
+      });
+
+      const data = await response.json();
       console.log('Success:', data);
-      // Reset form after submission
       this.setState({
         content: '',
         preview: ''
       });
-
       post_this.fetchPost();
-    })
-    .catch((error) => {
+    } catch (error) {
       console.error('Error:', error);
-      // Handle any errors here, such as showing an error message to the user
-    });
+    }
+  }
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+    // const urlParams = new URLSearchParams(window.location.search);
+    // const postId = urlParams.get('id');
+    // Here you would typically call your API to create a new reply
+    // console.log('Submitting new reply:', { content: this.state.content, postId });
+    const { content } = this.state;
+    this.signAndSubmitReply(content);
+
+    // Send HTTP POST request using fetch API
+    // fetch('/api/reply', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({ content: this.state.content, post_id: postId }),
+    // })
+    // .then(response => response.json())
+    // .then(data => {
+    //   console.log('Success:', data);
+    //   // Reset form after submission
+    //   this.setState({
+    //     content: '',
+    //     preview: ''
+    //   });
+
+    //   post_this.fetchPost();
+    // })
+    // .catch((error) => {
+    //   console.error('Error:', error);
+    //   // Handle any errors here, such as showing an error message to the user
+    // });
   };
 
   handleContentChange = (e) => {
