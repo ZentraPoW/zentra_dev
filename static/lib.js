@@ -372,17 +372,20 @@ class PostList extends React.Component {
   }
 }
 
+class NewPostForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      title: '',
+      content: '',
+      preview: ''
+    };
+  }
 
-function NewPostForm() {
-  const [title, setTitle] = React.useState('');
-  const [content, setContent] = React.useState('');
-  const [preview, setPreview] = React.useState('');
-
-  const handleSubmit = (e) => {
+  handleSubmit = (e) => {
     e.preventDefault();
-    // Here you would typically call your API to create a new post
+    const { title, content } = this.state;
     console.log('Submitting new post:', { title, content });
-    // Send HTTP POST request using fetch API
     fetch('/api/new', {
       method: 'POST',
       headers: {
@@ -393,27 +396,27 @@ function NewPostForm() {
     .then(response => response.json())
     .then(data => {
       console.log('Success:', data);
-      // You can add additional logic here, such as updating the UI or showing a success message
-      // Reset form after submission
-      setTitle('');
-      setContent('');
-      setPreview('');
-
+      this.setState({
+        title: '',
+        content: '',
+        preview: ''
+      });
       post_list_this.fetchPosts();
     })
     .catch((error) => {
       console.error('Error:', error);
-      // Handle any errors here, such as showing an error message to the user
     });
   };
 
-  const handleContentChange = (e) => {
+  handleContentChange = (e) => {
     const newContent = e.target.value;
-    setContent(newContent);
-    setPreview(marked.parse(newContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')));
+    this.setState({
+      content: newContent,
+      preview: marked.parse(newContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'))
+    });
   };
 
-  const insertMarkdown = (tag) => {
+  insertMarkdown = (tag) => {
     const textarea = document.querySelector('textarea');
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
@@ -439,86 +442,92 @@ function NewPostForm() {
     }
 
     const newText = text.substring(0, start) + insertion + text.substring(end);
-    setContent(newText);
-    setPreview(marked.parse(newText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')));
+    this.setState({
+      content: newText,
+      preview: marked.parse(newText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'))
+    });
     textarea.focus();
     textarea.setSelectionRange(start + insertion.length, start + insertion.length);
   };
 
-  return React.createElement(
-    'div',
-    { className: 'new-post-form box' },
-    React.createElement('h2', { className: 'title is-3' }, 'Create a New Post'),
-    React.createElement(
-      'form',
-      { onSubmit: handleSubmit },
+  render() {
+    const { title, content, preview } = this.state;
+
+    return React.createElement(
+      'div',
+      { className: 'new-post-form box' },
+      React.createElement('h2', { className: 'title is-3' }, 'Create a New Post'),
       React.createElement(
-        'div',
-        { className: 'field' },
+        'form',
+        { onSubmit: this.handleSubmit },
         React.createElement(
           'div',
-          { className: 'control' },
-          React.createElement('input', {
-            className: 'input',
-            type: 'text',
-            placeholder: 'Enter post title',
-            value: title,
-            onChange: (e) => setTitle(e.target.value),
-            required: true
-          })
-        )
-      ),
-      React.createElement(
-        'div',
-        { className: 'field' },
-        React.createElement(
-          'div',
-          { className: 'control' },
-          React.createElement('textarea', {
-            className: 'textarea',
-            rows: '4',
-            placeholder: 'Enter post content (Markdown supported)',
-            value: content,
-            onChange: handleContentChange,
-            required: true
-          })
-        )
-      ),
-      React.createElement(
-        'div',
-        { className: 'field is-grouped' },
-        React.createElement(
-          'div',
-          { className: 'control' },
+          { className: 'field' },
           React.createElement(
-            'button',
-            { className: 'button is-primary', type: 'submit' },
-            'Submit Post'
+            'div',
+            { className: 'control' },
+            React.createElement('input', {
+              className: 'input',
+              type: 'text',
+              placeholder: 'Enter post title',
+              value: title,
+              onChange: (e) => this.setState({ title: e.target.value }),
+              required: true
+            })
           )
         ),
         React.createElement(
           'div',
-          { className: 'control' },
+          { className: 'field' },
           React.createElement(
             'div',
-            { className: 'buttons' },
-            React.createElement('button', { type: 'button', className: 'button is-small', onClick: () => insertMarkdown('h1') }, 'H1'),
-            React.createElement('button', { type: 'button', className: 'button is-small', onClick: () => insertMarkdown('h2') }, 'H2'),
-            React.createElement('button', { type: 'button', className: 'button is-small', onClick: () => insertMarkdown('h3') }, 'H3'),
-            React.createElement('button', { type: 'button', className: 'button is-small', onClick: () => insertMarkdown('img') }, 'Image'),
-            React.createElement('button', { type: 'button', className: 'button is-small', onClick: () => insertMarkdown('code') }, 'Code')
+            { className: 'control' },
+            React.createElement('textarea', {
+              className: 'textarea',
+              rows: '4',
+              placeholder: 'Enter post content (Markdown supported)',
+              value: content,
+              onChange: this.handleContentChange,
+              required: true
+            })
+          )
+        ),
+        React.createElement(
+          'div',
+          { className: 'field is-grouped' },
+          React.createElement(
+            'div',
+            { className: 'control' },
+            React.createElement(
+              'button',
+              { className: 'button is-primary', type: 'submit' },
+              'Submit Post'
+            )
+          ),
+          React.createElement(
+            'div',
+            { className: 'control' },
+            React.createElement(
+              'div',
+              { className: 'buttons' },
+              React.createElement('button', { type: 'button', className: 'button is-small', onClick: () => this.insertMarkdown('h1') }, 'H1'),
+              React.createElement('button', { type: 'button', className: 'button is-small', onClick: () => this.insertMarkdown('h2') }, 'H2'),
+              React.createElement('button', { type: 'button', className: 'button is-small', onClick: () => this.insertMarkdown('h3') }, 'H3'),
+              React.createElement('button', { type: 'button', className: 'button is-small', onClick: () => this.insertMarkdown('img') }, 'Image'),
+              React.createElement('button', { type: 'button', className: 'button is-small', onClick: () => this.insertMarkdown('code') }, 'Code')
+            )
           )
         )
+      ),
+      React.createElement(
+        'div',
+        { className: 'content' },
+        React.createElement('hr', {}, null),
+        React.createElement('h3', { className: 'title is-4' }, 'Preview'),
+        React.createElement('div', { dangerouslySetInnerHTML: { __html: preview } })
       )
-    ),
-    React.createElement(
-      'div',
-      { className: 'content' },
-      React.createElement('hr', {}, null),
-      React.createElement('h3', { className: 'title is-4' }, 'Preview'),
-      React.createElement('div', { dangerouslySetInnerHTML: { __html: preview } })
-    )
-  );
+    );
+  }
 }
 
 
