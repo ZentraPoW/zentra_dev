@@ -372,6 +372,7 @@ class PostList extends React.Component {
   }
 }
 
+
 class NewPostForm extends React.Component {
   constructor(props) {
     super(props);
@@ -382,19 +383,31 @@ class NewPostForm extends React.Component {
     };
   }
 
-  handleSubmit = (e) => {
-    e.preventDefault();
-    const { title, content } = this.state;
-    console.log('Submitting new post:', { title, content });
-    fetch('/api/new', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ title, content }),
-    })
-    .then(response => response.json())
-    .then(data => {
+  async signAndSubmitPost(title, content) {
+    if (typeof window.ethereum === 'undefined') {
+      console.error('MetaMask is not installed');
+      return;
+    }
+
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const account = accounts[0];
+
+      const message = JSON.stringify({ title, content });
+      const signature = await window.ethereum.request({
+        method: 'personal_sign',
+        params: [message, account],
+      });
+
+      const response = await fetch('/api/new', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title, content, signature, address: account }),
+      });
+
+      const data = await response.json();
       console.log('Success:', data);
       this.setState({
         title: '',
@@ -402,10 +415,38 @@ class NewPostForm extends React.Component {
         preview: ''
       });
       post_list_this.fetchPosts();
-    })
-    .catch((error) => {
+    } catch (error) {
       console.error('Error:', error);
-    });
+    }
+  }
+
+  handleSubmit = async (e) => {
+    e.preventDefault();
+    const { title, content } = this.state;
+
+    this.signAndSubmitPost(title, content);
+
+    // console.log('Submitting new post:', { title, content });
+    // fetch('/api/new', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({ title, content }),
+    // })
+    // .then(response => response.json())
+    // .then(data => {
+    //   console.log('Success:', data);
+    //   this.setState({
+    //     title: '',
+    //     content: '',
+    //     preview: ''
+    //   });
+    //   post_list_this.fetchPosts();
+    // })
+    // .catch((error) => {
+    //   console.error('Error:', error);
+    // });
   };
 
   handleContentChange = (e) => {
