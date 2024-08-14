@@ -34,7 +34,7 @@ class NewPostAPIHandler(tornado.web.RequestHandler):
             return
 
         # Reconstruct the message that was signed
-        message = json.dumps({"title": title, "content": content}, separators = (',', ':'))
+        message = json.dumps({"title": title, "content": content}, separators = (',', ':'), ensure_ascii=False)
         # try:
         recovered_address = w3.eth.account.recover_message(
             eth_account.messages.encode_defunct(text=message),
@@ -77,12 +77,12 @@ class ReplyAPIHandler(tornado.web.RequestHandler):
         signature = data['signature']
         address = data['address']
 
-        if not post_id or not content:
-            self.set_status(400)
-            self.write({"error": "Missing post ID or content"})
-            return
+        # if not post_id or not content:
+        #     self.set_status(400)
+        #     self.write({"error": "Missing post ID or content"})
+        #     return
 
-        message = json.dumps({"post_id": post_id, "content": content}, separators = (',', ':'))
+        message = json.dumps({"post_id": post_id, "content": content}, separators = (',', ':'), ensure_ascii=False)
         recovered_address = w3.eth.account.recover_message(
             eth_account.messages.encode_defunct(text=message),
             signature=signature
@@ -226,9 +226,9 @@ if __name__ == "__main__":
         (r"/api/post", PostAPIHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": os.path.join(os.path.dirname(__file__), "static")}),
     ], debug=True)  # Enable debug mode for auto-reload
-    app.listen(8888)
+    app.listen(8060)
 
     # print("Auto-reload is enabled. The server will restart automatically when code changes are detected.")
     # tornado.autoreload.start()  # Start the auto-reload mechanism
-    print("Server is running on http://localhost:8888")
+    print("Server is running on http://localhost:8060")
     tornado.ioloop.IOLoop.current().start()

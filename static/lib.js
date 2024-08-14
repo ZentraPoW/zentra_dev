@@ -147,7 +147,7 @@ class Post extends React.Component {
               React.createElement(
                 'div',
                 { key: reply.id, className: 'box reply' },
-                React.createElement('p', { className: 'subtitle is-6' }, `Reply by: Anonymous`),
+                React.createElement('p', { className: 'subtitle is-6' }, `Reply by: ${reply.author}`),
                 React.createElement('div', { 
                   className: 'content',
                   dangerouslySetInnerHTML: { __html: marked.parse(reply.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')) }
